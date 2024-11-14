@@ -192,6 +192,51 @@ def add_service():
 
     return render_template('user/admin_add_service.html')
 
+# Route to edit a service
+@app.route('/user/edit_service/<int:service_id>', methods=['GET', 'POST'])
+def edit_service(service_id):
+    service = Services.query.get_or_404(service_id)
+    
+    if request.method == 'POST':
+        service.service_name = request.form['service_name']
+        service.base_price = request.form['base_price']
+        db.session.commit()
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('user/edit_service.html', service=service)
+
+# Route to delete a service
+@app.route('/user/delete_service/<int:service_id>', methods=['POST'])
+def delete_service(service_id):
+    service = Services.query.get_or_404(service_id)
+    db.session.delete(service)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Route to approve a professional
+@app.route('/user/approve_professional/<int:professional_id>', methods=['POST'])
+def approve_professional(professional_id):
+    professional = Professional.query.get_or_404(professional_id)
+    professional.status = 'Approved'  # Assuming you have a status field
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Route to reject a professional
+@app.route('/user/reject_professional/<int:professional_id>', methods=['POST'])
+def reject_professional(professional_id):
+    professional = Professional.query.get_or_404(professional_id)
+    professional.status = 'Rejected'  # Assuming you have a status field
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
+# Route to delete a professional
+@app.route('/user/delete_professional/<int:professional_id>', methods=['POST'])
+def delete_professional(professional_id):
+    professional = Professional.query.get_or_404(professional_id)
+    db.session.delete(professional)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/user/admin_dashboard', methods=['GET'])
 def admin_dashboard():
     services=Services.query.all()
