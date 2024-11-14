@@ -14,20 +14,20 @@ from app import db
 app = Flask(__name__, instance_relative_config=True)
 app.secret_key = secrets.token_hex(16)
 
-# Set the database URI (using the correct SQLite URI format)
+# setting database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = r"sqlite:///C:\Users\Ishita Tayal\Desktop\household_services.db"  # Absolute path for SQLite
 
-# Disable track modifications (optional)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
 db.init_app(app)
 migrate = Migrate(app, db)
 
-# Create the tables (Only needed on the first run)
-# with app.app_context():
-#     db.create_all()
+# Create the tables
+with app.app_context():
+    db.create_all()
 
+#BEGINNING OF ROUTES
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -43,25 +43,22 @@ def user_login():
         customer =  Customer.query.filter_by(email=email, password=password).first()
         if customer:
             session['customer_id'] = customer.customer_id
-            flash(f'Welcome back, {customer.full_name}!', 'success')
             return redirect(url_for('customer_dashboard'))  # Redirect to Customer Dashboard
 
-        # Check if the user is a Professional
+        # query to verify if the user is a professional
         professional = Professional.query.filter_by(email=email, password=password).first()
         if professional:
             session['professional_id'] = professional.professional_id
-            flash(f'Welcome back, {professional.full_name}!', 'success')
             return redirect(url_for('professional_dashboard'))  # Redirect to Professional Dashboard
 
-        # Check if the user is an Admin
+        # query to verify if the user is an admin
         admin = Admin.query.filter_by(email=email, password=password).first()
         if admin:
-            flash(f'Welcome back, {admin.email}!', 'success')
             return redirect(url_for('admin_dashboard'))  # Redirect to Admin Dashboard
 
-        # If no match is found, flash an error message
+        # if no match is found, flash an error message
         flash('Invalid credentials. Please try again.', 'danger')
-        return redirect(url_for('user_login'))  # Redirect back to login page
+        return redirect(url_for('user_login'))  # redirect back to login page
 
     return render_template('user/login.html')
 
@@ -78,13 +75,13 @@ def user_register():
         existing_customer = Customer.query.filter_by(email=email).first()
         if existing_customer:
             flash('Already Registered with this email. Please login.', 'danger')
-            return render_template('user/register.html')  # Render the same page with the flash message
+            return render_template('user/register.html')  # same page with the flash message
 
         # Check if the email exists in the Professional table
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
             flash('Already Registered with this email. Please login.', 'danger')
-            return render_template('user/register.html')  # Render the same page with the flash message
+            return render_template('user/register.html')  # same page with the flash message
 
         # Create a new Customer object
         new_customer = Customer(
@@ -101,7 +98,7 @@ def user_register():
         db.session.commit()
 
         flash('Registered Successfully! Please login to continue.', 'success')
-        return render_template('user/register.html')  # Render the same page with the success message
+        return render_template('user/register.html')  # same page with the flash message
 
     return render_template('user/register.html')
 
@@ -117,49 +114,49 @@ def service_prof_signup():
         address = request.form['address']
         pincode = request.form['pincode']
 
-        # Check if the email exists in the Customer table
+        # check for email in cust table
         existing_customer = Customer.query.filter_by(email=email).first()
         if existing_customer:
             flash('Already Registered with this email. Please login.', 'danger')
-            return render_template('user/service_prof_signup.html')  # Render the same page with the flash message
+            return render_template('user/service_prof_signup.html')  # same page with the flash message
 
-        # Check if the email exists in the Professional table
+        # check for email in the prof table
         existing_professional = Professional.query.filter_by(email=email).first()
         if existing_professional:
             flash('Already Registered with this email. Please login.', 'danger')
-            return render_template('user/service_prof_signup.html')  # Render the same page with the flash message
+            return render_template('user/service_prof_signup.html')  # same page with the flash message
 
-        # Save the document as binary data if necessary
+        # attached doc is saved in binary format
         document_data = document.read() if document else None
 
-        # Create a new Professional object
+        # new_professional to append entry in the database
         new_professional = Professional(
             email=email,
             password=password,
             full_name=full_name,
             service_name=service_name,
             experience=experience,
-            document=document_data,  # Store PDF as binary data
+            document=document_data,  # store PDF as binary data
             address=address,
             pincode=pincode,
             role='professional'
         )
 
-        # Add to the database
+        # add to the database
         db.session.add(new_professional)
         db.session.commit()
 
         flash('Registered Successfully! Please login to continue.', 'success')
-        return render_template('user/service_prof_signup.html')  # Render the same page with the success message
+        return render_template('user/service_prof_signup.html')  # same page with the success message
 
     return render_template('user/service_prof_signup.html')
 
 def get_logged_in_professional():
-    # Validate logged-in professional
+    # validate professional who logged in
     professional_id = session.get('professional_id')
     if professional_id:
-        return Professional.query.get(professional_id)  # Fetch the professional object from the database
-    return None  # If no professional is logged in, return None
+        return Professional.query.get(professional_id)  # fetch the professional-id from the database
+    return None  # return none when no prof has logged in
 
 @app.route('/professional/login', methods=['GET'])
 def service_professional_login():
@@ -177,22 +174,21 @@ def admin_login():
 @app.route('/user/admin_add_service', methods=['GET', 'POST'])
 def add_service():
     if request.method == 'POST':
-        # Retrieve form data
+        # get the required data from the form data
         service_id = request.form['service_id']
         service_name = request.form['service_name']
         base_price = request.form['base_price']
 
-        # Initialize and store new service data
+        # store new service data
         new_service = Services(id=service_id,service_name=service_name, base_price=base_price)
         db.session.add(new_service)
         db.session.commit()
 
-        flash('New service added successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))  # Redirect to the admin dashboard
+        return redirect(url_for('admin_dashboard'))  # redirect to the admin dashboard where it was previously
 
     return render_template('user/admin_add_service.html')
 
-# Route to edit a service
+# route to edit a service
 @app.route('/user/edit_service/<int:service_id>', methods=['GET', 'POST'])
 def edit_service(service_id):
     service = Services.query.get_or_404(service_id)
@@ -205,7 +201,7 @@ def edit_service(service_id):
     
     return render_template('user/edit_service.html', service=service)
 
-# Route to delete a service
+# route to delete a service
 @app.route('/user/delete_service/<int:service_id>', methods=['POST'])
 def delete_service(service_id):
     service = Services.query.get_or_404(service_id)
@@ -213,23 +209,23 @@ def delete_service(service_id):
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
-# Route to approve a professional
+# route to approve a professional
 @app.route('/user/approve_professional/<int:professional_id>', methods=['POST'])
 def approve_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
-    professional.status = 'Approved'  # Assuming you have a status field
+    professional.status = 'Approved'  
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
-# Route to reject a professional
+# route to reject a professional
 @app.route('/user/reject_professional/<int:professional_id>', methods=['POST'])
 def reject_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
-    professional.status = 'Rejected'  # Assuming you have a status field
+    professional.status = 'Rejected' 
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
-# Route to delete a professional
+# route to delete a professional
 @app.route('/user/delete_professional/<int:professional_id>', methods=['POST'])
 def delete_professional(professional_id):
     professional = Professional.query.get_or_404(professional_id)
@@ -239,53 +235,62 @@ def delete_professional(professional_id):
 
 @app.route('/user/admin_dashboard', methods=['GET'])
 def admin_dashboard():
-    services=Services.query.all()
-    # Retrieve today's services and include professional names
-    today_services_query = db.session.execute(
-        text("""
-            SELECT ts.id, ts.professional_id, p.full_name as professional_name
-            FROM today__services ts
-            LEFT JOIN professional p ON ts.professional_id = p.professional_id
-        """)
-    ).mappings()
+    # get all services
+    services = Services.query.all()
+
+    # retrieve todays services and include professional names
+    today_services_query = (
+        db.session.query(
+            Today_Services.id,
+            Today_Services.professional_id,
+            Professional.full_name.label('professional_name')
+        )
+        .outerjoin(Professional, Today_Services.professional_id == Professional.professional_id)
+        .all()
+    )
+
+    # Convert today_services_query results to dictionaries
+    today_services = [dict(id=row.id, professional_id=row.professional_id, professional_name=row.professional_name) for row in today_services_query]
 
     # Query closed services and join with professionals to get their names
-    closed_services_query = db.session.execute(
-        text("""
-            SELECT cs.id, cs.pid AS professional_id, cs.date, p.full_name as professional_name
-            FROM closed__services cs
-            LEFT JOIN professional p ON cs.pid = p.professional_id
-        """)
-    ).mappings()
+    closed_services_query = (
+        db.session.query(
+            Closed_Services.id,
+            Closed_Services.pid.label('professional_id'),
+            Closed_Services.date,
+            Professional.full_name.label('professional_name')
+        )
+        .outerjoin(Professional, Closed_Services.pid == Professional.professional_id)
+        .all()
+    )
+
+    # Convert closed_services_query results to dictionaries
+    closed_services = [dict(id=row.id, professional_id=row.professional_id, date=row.date, professional_name=row.professional_name) for row in closed_services_query]
 
     # Query service history (no join needed, already have professional_name)
-    service_history_query = db.session.execute(
-        text("""
-            SELECT sh.service_id AS id, sh.service_name, sh.professional_name, sh.status
-            FROM service__history sh
-        """)
-    ).mappings()
+    service_history_query = (
+        db.session.query(
+            Service_History.service_id.label('id'),
+            Service_History.service_name,
+            Service_History.professional_name,
+            Service_History.status
+        )
+        .all()
+    )
+
+    # Convert service_history_query results to dictionaries
+    service_history = [dict(id=row.id, service_name=row.service_name, professional_name=row.professional_name, status=row.status) for row in service_history_query]
 
     # Query all professionals
-    professionals_query = db.session.execute(
-        text("""
-            SELECT * FROM professional
-        """)
-    ).mappings()
-    professionals = list(professionals_query)
-
-    # Convert query results directly to lists of dictionaries
-    today_services = list(today_services_query)
-    closed_services = list(closed_services_query)
-    service_history = list(service_history_query)
+    professionals = db.session.query(Professional).all()
 
     # Format data for template
     service_requests = []
 
     # Service history
     for history in service_history:
-        # Map status codes to full names (R -> Requested, A -> Accepted, C -> Closed)
-        status = 'R' if history['status'] == 'Requested'  else 'C'
+        # Map status codes to full names (R -> Requested, C -> Closed)
+        status = 'R' if history['status'] == 'Requested' else 'C'
         
         service_requests.append({
             'id': history['id'],
@@ -298,81 +303,78 @@ def admin_dashboard():
     return render_template(
         'user/admin_dashboard.html',
         services=services,
-        professionals=professionals,  # Now you pass the professionals data here
+        professionals=professionals,  # Pass professionals data here
         service_requests=service_requests
     )
 
-@app.route('/user/admin_search', methods=['GET', 'POST'])  # Allow both GET and POST methods
+# Admin Routes
+@app.route('/user/admin_search', methods=['GET', 'POST'])
 def admin_search():
-    search_results = []
-    search_by = None  # Initialize search_by variable
+    # Initialize search results and criteria
+    results, criteria = [], None
 
-    if request.method == 'POST':  # Handle POST request
-        search_by = request.form.get('searchBy')
-        search_text = request.form.get('searchText')
+    if request.method == 'POST':
+        criteria = request.form.get('searchBy')
+        search_input = request.form.get('searchText')
 
-        if not search_text:
+        if not search_input:
             flash('Please enter search text.', 'warning')
             return redirect(url_for('admin_search'))
 
-        # Handling different search criteria and querying the appropriate table
-        if search_by == 'services':
-            # Search in the 'services' table for service_name
-            search_results = Services.query.filter(Services.service_name.ilike(f"%{search_text}%")).all()
-        elif search_by == 'service requests':
-            # Search in the 'service_req' table for service_name
-            search_results = Service_Req.query.filter(Service_Req.service_name.ilike(f"%{search_text}%")).all()
-        elif search_by == 'customers':
-            # Search in the 'customers' table for full_name
-            search_results = Customer.query.filter(Customer.full_name.ilike(f"%{search_text}%")).all()
-        elif search_by == 'professionals':
-            # Search in the 'professionals' table for full_name
-            search_results = Professional.query.filter(Professional.full_name.ilike(f"%{search_text}%")).all()
+        # Define model fields to search based on selected criteria
+        search_targets = {
+            'services': Services.service_name,
+            'service requests': Service_Req.service_name,
+            'customers': Customer.full_name,
+            'professionals': Professional.full_name
+        }
+
+        # Execute search if valid criteria selected
+        if criteria in search_targets:
+            target_field = search_targets[criteria]
+            model = target_field.class_
+            results = model.query.filter(target_field.ilike(f"%{search_input}%")).all()
         else:
             flash('Invalid search criteria.', 'danger')
 
-    return render_template('user/admin_search.html', search_results=search_results, search_by=search_by)
+    return render_template('user/admin_search.html', search_results=results, search_by=criteria)
 
 @app.route('/user/admin_summary', methods=['GET'])
 def admin_summary():
-    # Query for ratings data
-    ratings_query = text("SELECT rating, COUNT(*) FROM closed__services GROUP BY rating")
-    ratings_result = db.session.execute(ratings_query).fetchall()
+    # Aggregate ratings data, grouping by rating value
+    rating_counts = (
+        db.session.query(Closed_Services.rating, func.count())
+        .group_by(Closed_Services.rating)
+        .all()
+    )
+    ratings_data = {str(rating): count for rating, count in rating_counts}
 
-    # Process ratings result into a format for Chart.js
-    ratings_data = {str(row[0]): row[1] for row in ratings_result}
+    # Count total service requests in different categories
+    received_count = db.session.query(func.count()).select_from(Service_History).scalar()
+    closed_count = db.session.query(func.count()).select_from(Closed_Services).scalar()
+    rejected_count = sum(count for status, count in db.session.query(Services_status.status, func.count()).group_by(Services_status.status).all() if status == 'R')
 
-    # Query for service requests data
-    requests_query = text("SELECT COUNT(*) FROM service__history")
-    requests_query2 = text("SELECT COUNT(*) FROM closed__services")
-    requests_query3 = text("SELECT status,COUNT(*) FROM services_status group by status")
-    requests_result2 = db.session.execute(requests_query2).fetchall()
-    requests_result = db.session.execute(requests_query).fetchall()
-    requests_result3 = db.session.execute(requests_query3).fetchall()
-
-    # Process service requests result   
-    service_requests_data = {
-        'Received': (requests_result[0][0]),
-        'Closed': sum(row[0] for row in requests_result2),
-        'Rejected': sum(row[1] for row in requests_result3 if row[0] == 'R')
+    service_requests_summary = {
+        'Received': received_count,
+        'Closed': closed_count,
+        'Rejected': rejected_count
     }
 
-    return render_template('user/admin_summary.html', ratings_data=ratings_data, service_requests_data=service_requests_data)
-
+    return render_template('user/admin_summary.html', ratings_data=ratings_data, service_requests_data=service_requests_summary)
 
 # CUSTOMER ROUTES
 @app.route('/user/customer_dashboard', methods=['GET'])
 def customer_dashboard():
-    customer_id = session['customer_id']
-    service_history = Service_History.query.filter_by(id=customer_id).all()
-    services = Services.query.all()
-    return render_template('user/customer_dashboard.html', services=services,service_history=service_history)
+    customer_id = session.get('customer_id')
+    history_records = Service_History.query.filter_by(id=customer_id).all()
+    available_services = Services.query.all()
+    return render_template('user/customer_dashboard.html', services=available_services, service_history=history_records)
 
 @app.route('/user/customer_profile', methods=['GET'])
 def customer_profile():
-    customer_id = session['customer_id']  # Retrieve customer_id from session
-    customer = Customer.query.filter_by(customer_id=customer_id).one()
-    return render_template('user/customer_profile.html', customer=customer)
+    customer_id = session.get('customer_id')
+    customer_info = Customer.query.filter_by(customer_id=customer_id).one()
+    return render_template('user/customer_profile.html', customer=customer_info)
 
 @app.route('/user/customer_remarks', methods=['GET'])
 def customer_remarks():
@@ -380,73 +382,80 @@ def customer_remarks():
 
 @app.route('/user/customer_summary', methods=['GET'])
 def customer_summary():
-    customer_id = session['customer_id']
-    # Query for the total number of records (Requested)
-    total_requested = db.session.query(func.count(Service_History.id)).filter(Service_History.id == customer_id).scalar()
+    customer_id = session.get('customer_id')
 
-    # Query for the number of Closed records
-    total_closed = db.session.query(func.count(Service_History.id)).filter(Service_History.id == customer_id, Service_History.status == 'Closed').scalar()
+    # Count total requests and closed requests for the customer
+    total_requests = db.session.query(func.count(Service_History.id)).filter(Service_History.id == customer_id).scalar()
+    closed_requests = db.session.query(func.count(Service_History.id)).filter(Service_History.id == customer_id, Service_History.status == 'Closed').scalar()
 
-    # Calculate the number of Assigned records (Requested - Closed)
-    total_assigned = total_requested - total_closed
+    # Calculate assigned requests by subtracting closed from total
+    assigned_requests = total_requests - closed_requests
 
-    # Prepare the data for the chart
-    service_history_data = {
-        'Requested': total_requested,
-        'Closed': total_closed,
-        'Assigned': total_assigned
+    # Prepare data summary
+    service_summary_data = {
+        'Requested': total_requests,
+        'Closed': closed_requests,
+        'Assigned': assigned_requests
     }
 
-    return render_template('user/customer_summary.html', service_history_data=service_history_data)
+    return render_template('user/customer_summary.html', service_history_data=service_summary_data)
 
 @app.route('/user/submit_service_remarks', methods=['POST'])
 def submit_service_remarks():
-    customer_id = session['customer_id']  # Retrieve customer_id from session
-    customer = Customer.query.filter_by(customer_id=customer_id).one()
+    customer_id = session.get('customer_id')
+    customer_info = Customer.query.filter_by(customer_id=customer_id).one()
     service_id = request.form.get('service_id')
-    professional = Professional.query.join(Service_History, Professional.full_name == Service_History.professional_name).filter(Service_History.service_id == service_id).filter(Professional.full_name == Service_History.professional_name).one()
-    date_string = datetime.today().strftime('%Y-%m-%d')
-    # Create a new booking instance
-    closed_booking = Closed_Services(
-        customer_name=customer.full_name,
-        email=customer.email,
-        location=customer.address,
-        date=datetime.strptime(date_string, "%Y-%m-%d").date(),
-        cid=customer.customer_id,
-        pid=professional.professional_id,
-        rating = request.form.get('rating')
+
+    # Find the relevant professional
+    professional_info = (
+        Professional.query
+        .join(Service_History, Professional.full_name == Service_History.professional_name)
+        .filter(Service_History.service_id == service_id, Professional.full_name == Service_History.professional_name)
+        .one()
     )
-    db.session.add(closed_booking)
+
+    # Create a record for closed service
+    new_closed_service = Closed_Services(
+        customer_name=customer_info.full_name,
+        email=customer_info.email,
+        location=customer_info.address,
+        date=datetime.today().date(),
+        cid=customer_info.customer_id,
+        pid=professional_info.professional_id,
+        rating=request.form.get('rating')
+    )
+    db.session.add(new_closed_service)
     db.session.commit()
     return redirect(url_for('customer_dashboard'))
 
 @app.route('/user/customer_search', methods=['GET', 'POST'])
 def customer_search():
-    search_results = []
-    search_by = None  # Initialize search_by variable
+    # Initialize search results and criteria
+    results, criteria = [], None
 
-    if request.method == 'POST':  # Handle POST request
-        search_by = request.form.get('searchBy')
+    if request.method == 'POST':
+        criteria = request.form.get('searchBy')
         search_text = request.form.get('searchInput')
 
         if not search_text:
             flash('Please enter search text.', 'warning')
             return redirect(url_for('customer_search'))
 
-        # Handling different search criteria and querying the appropriate table
-        if search_by == 'service_name':
-            # Search in the 'services' table for service_name
-            search_results = Professional.query.filter(Professional.service_name.ilike(f"%{search_text}%"),Professional.status == "Approved").all()
-        elif search_by == 'pin_code':
-            # Search in the 'professional' table for pincode
-            search_results = Professional.query.filter(Professional.pincode.ilike(f"%{search_text}%"),Professional.status == "Approved").all()
-        elif search_by == 'location':
-            # Search in the 'professional' table for location
-            search_results = Professional.query.filter(Professional.address.ilike(f"%{search_text}%"),Professional.status == "Approved").all()
+        # Define search criteria and fields for professionals
+        search_filters = {
+            'service_name': Professional.service_name,
+            'pin_code': Professional.pincode,
+            'location': Professional.address
+        }
+
+        # Execute search query if criteria is valid
+        if criteria in search_filters:
+            filter_field = search_filters[criteria]
+            results = Professional.query.filter(filter_field.ilike(f"%{search_text}%"), Professional.status == "Approved").all()
         else:
             flash('Invalid search criteria.', 'danger')
 
-    return render_template('user/customer_search.html', search_results=search_results, search_by=search_by)
+    return render_template('user/customer_search.html', search_results=results, search_by=criteria)
 
 @app.route('/book_service', methods=['POST'])
 def book_service():
@@ -518,183 +527,173 @@ def search_services():
 #PROFESSIONAL ROUTES
 @app.route('/user/professional_dashboard', methods=['GET'])
 def professional_dashboard():
-    professional = get_logged_in_professional()
-    professional_id = session.get('professional_id')  # Assuming the professional's ID is stored in session
+    current_professional = get_logged_in_professional()
+    prof_id = session.get('professional_id')  # Assuming professional's ID is stored in session
 
-    # Query the database for today and closed services, filtering by professional_id
-    today_services = Today_Services.query.filter_by(professional_id=professional_id).all()
-    closed_services = Closed_Services.query.filter_by(pid=professional_id).all()
+    # Query for today and closed services assigned to the professional
+    active_services = Today_Services.query.filter_by(professional_id=prof_id).all()
+    completed_services = Closed_Services.query.filter_by(pid=prof_id).all()
 
     # Render the template with dynamic data
     return render_template('user/professional_dashboard.html', 
-                           professional=professional, 
-                           today_services=today_services, 
-                           closed_services=closed_services)
+                           professional=current_professional, 
+                           today_services=active_services, 
+                           closed_services=completed_services)
 
 @app.route('/accept_service/<int:service_id>', methods=['POST'])
 def accept_service(service_id):
-    # Get the service from Today_Services
-    service = Today_Services.query.get(service_id)
-    if service:
-        # Add the service to Services_status with status 'A'
-        new_service = Services_status(
-            customer_name=service.customer_name,
-            email=service.email,
-            location=service.location,
+    # Retrieve the service from Today_Services by ID
+    selected_service = Today_Services.query.get(service_id)
+    if selected_service:
+        # Add to Services_status with an 'Accepted' status
+        accepted_service = Services_status(
+            customer_name=selected_service.customer_name,
+            email=selected_service.email,
+            location=selected_service.location,
             status='A'
         )
-        db.session.add(new_service)
-        db.session.delete(service)  # Remove from Today_Services
+        db.session.add(accepted_service)
+        db.session.delete(selected_service)  # Remove from Today's Services
         db.session.commit()
     return redirect(url_for('professional_dashboard'))
 
 @app.route('/reject_service/<int:service_id>', methods=['POST'])
 def reject_service(service_id):
-    # Get the service from Today_Services
-    service = Today_Services.query.get(service_id)
-    if service:
-        # Add the service to Services_status with status 'R'
-        new_service = Services_status(
-            customer_name=service.customer_name,
-            email=service.email,
-            location=service.location,
+    # Retrieve the service from Today_Services by ID
+    selected_service = Today_Services.query.get(service_id)
+    if selected_service:
+        # Add to Services_status with a 'Rejected' status
+        rejected_service = Services_status(
+            customer_name=selected_service.customer_name,
+            email=selected_service.email,
+            location=selected_service.location,
             status='R'
         )
-        db.session.add(new_service)
-        db.session.delete(service)  # Remove from Today_Services
+        db.session.add(rejected_service)
+        db.session.delete(selected_service)  # Remove from Today's Services
         db.session.commit()
     return redirect(url_for('professional_dashboard'))
 
 @app.route('/user/professional_view_profile/<int:professional_id>', methods=['GET'])
 def professional_view_profile(professional_id):
-    # Fetch the professional by the ID passed in the URL
-    professional = Professional.query.get_or_404(professional_id)
-
-    return render_template('user/professional_view_profile.html', professional=professional)
+    # Fetch the professional by ID
+    prof = Professional.query.get_or_404(professional_id)
+    return render_template('user/professional_view_profile.html', professional=prof)
 
 @app.route('/user/professional_edit_profile/<int:professional_id>', methods=['GET', 'POST'])
 def professional_edit_profile(professional_id):
-    professional = Professional.query.get_or_404(professional_id)
+    prof = Professional.query.get_or_404(professional_id)
 
     if request.method == 'POST':
-        # Get form data, but exclude role and status from modification
-        email = request.form.get('email', professional.email)  # Default to current email
-        password = request.form.get('password')  # Use .get() to avoid KeyError
-        fullname = request.form.get('fullname')
-        service_name = request.form.get('service_name')
-        experience = request.form.get('experience')
-        document = request.files.get('document')  # Handle file upload
+        # Get and validate form data (excluding role/status fields)
+        email = request.form.get('email', prof.email)
+        new_password = request.form.get('password')
+        full_name = request.form.get('fullname')
+        service = request.form.get('service_name')
+        years_experience = request.form.get('experience')
+        uploaded_document = request.files.get('document')
         address = request.form.get('address')
         pincode = request.form.get('pincode')
 
-        # Ensure that required fields are provided
-        if not fullname or not service_name or not experience or not address or not pincode:
-            flash('Please fill in all required fields.', 'danger')
-            return render_template('user/professional_edit_profile.html', professional=professional)
+        # Check required fields
+        if not all([full_name, service, years_experience, address, pincode]):
+            flash('All required fields must be completed.', 'danger')
+            return render_template('user/professional_edit_profile.html', professional=prof)
+        
+        if new_password:
+            prof.password = new_password
 
-        # If the password field is not empty, hash and update it
-        if password:
-            # You should hash the password before saving it (e.g., using bcrypt or werkzeug.security)
-            professional.password = password  # Update the password (after hashing)
+        # Update professional information
+        prof.email = email
+        prof.full_name = full_name
+        prof.service_name = service
+        prof.experience = int(years_experience) if years_experience else 0
+        if uploaded_document:
+            prof.document = uploaded_document.read()
+        prof.address = address
+        prof.pincode = pincode
 
-        # Update other details but exclude role and status from the update
-        professional.email = email  # Email is either updated or remains unchanged
-        professional.full_name = fullname
-        professional.service_name = service_name
-        professional.experience = int(experience) if experience else 0  # Ensure experience is an integer
-        if document:
-            professional.document = document.read()  # Save document (e.g., file upload)
-        professional.address = address
-        professional.pincode = pincode
-
-        # Commit changes to the database
+        # Commit updated profile
         try:
             db.session.commit()
-            flash('Your profile has been updated successfully!', 'success')
-            return redirect(url_for('professional_view_profile', professional_id=professional.professional_id))
-        except Exception as e:
-            db.session.rollback()  # Rollback the session in case of error
-            flash(f"Error: {e}", 'danger')
-            return render_template('user/professional_edit_profile.html', professional=professional)
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('professional_view_profile', professional_id=prof.professional_id))
+        except Exception as error:
+            db.session.rollback()
+            flash(f"Error: {error}", 'danger')
+            return render_template('user/professional_edit_profile.html', professional=prof)
 
-    return render_template('user/professional_edit_profile.html', professional=professional)
+    return render_template('user/professional_edit_profile.html', professional=prof)
 
 @app.route('/user/professional_summary', methods=['GET'])
 def professional_summary():
-    # Get the logged-in professional
-    logged_in_professional = get_logged_in_professional()
+    current_professional = get_logged_in_professional()
+    
+    if not current_professional:
+        return redirect(url_for('user_login'))  # Redirect if no professional is logged in
 
-    if not logged_in_professional:
-        # If no professional is logged in, redirect to a login page or show an error
-        return redirect(url_for('user_login'))  # Modify 'user_login' to the name of your login route
+    # Fetch rating data for the logged-in professional
+    rating_data = (
+        db.session.query(Closed_Services.rating, func.count())
+        .filter(Closed_Services.pid == current_professional.professional_id)
+        .group_by(Closed_Services.rating)
+        .all()
+    )
 
-    # Query for ratings data for the logged-in professional
-    ratings_query = text("""
-        SELECT rating, COUNT(*) 
-        FROM closed__services 
-        WHERE pid = :professional_id
-        GROUP BY rating
-    """)
-    ratings_result = db.session.execute(ratings_query, {'professional_id': logged_in_professional.professional_id}).fetchall()
+    ratings_summary = {str(rate): count for rate, count in rating_data}
 
-    # Process ratings result into a format for Chart.js
-    ratings_data = {str(row[0]): row[1] for row in ratings_result}
+    # Fetch service request data for the logged-in professional
+    service_data = (
+        db.session.query(Service_History.status, func.count())
+        .filter(Service_History.professional_name == current_professional.full_name)
+        .group_by(Service_History.status)
+        .all()
+    )
 
-    # Query for service requests data for the logged-in professional (now using 'professional_name' instead of 'professional_id')
-    requests_query = text("""
-        SELECT status, COUNT(*) 
-        FROM service__history 
-        WHERE professional_name = :professional_name
-        GROUP BY status
-    """)
-    requests_result = db.session.execute(requests_query, {'professional_name': logged_in_professional.full_name}).fetchall()
-
-    # Process service requests result
-    service_requests_data = {
-        'Received': sum(row[1] for row in requests_result),
-        'Closed': sum(row[1] for row in requests_result if row[0] == 'C'),
-        'Rejected': sum(row[1] for row in requests_result if row[0] == 'R')
+    requests_summary = {
+        'Received': sum(count for _, count in service_data),
+        'Closed': sum(count for status, count in service_data if status == 'Closed'),
+        'Rejected': sum(count for status, count in service_data if status == 'Requested')
     }
 
-    # Return the summary data for the logged-in professional
     return render_template(
         'user/professional_summary.html',
-        ratings_data=ratings_data,
-        service_requests_data=service_requests_data
+        ratings_data=ratings_summary,
+        service_requests_data=requests_summary
     )
 
 @app.route('/user/professional_search', methods=['GET', 'POST'])
 def professional_search():
     search_results = []
     if request.method == 'POST':
-        search_by = request.form.get('searchBy')
-        search_text = request.form.get('searchText')
+        search_criterion = request.form.get('searchBy')
+        search_input = request.form.get('searchText')
 
-        if not search_text:
+        if not search_input:
             flash('Please enter search text.', 'warning')
             return redirect(url_for('professional_search'))
 
-        # Handling different search criteria
-        if search_by == 'date':
-            search_results = Closed_Services.query.filter(Closed_Services.date == search_text,Closed_Services.pid == session['professional_id']  ).all()
-        elif search_by == 'location':
-            search_results = Closed_Services.query.filter(Closed_Services.location.ilike(f"%{search_text}%"),Closed_Services.pid == session['professional_id'] ).all()
-        elif search_by == 'pincode':
-            search_results = Closed_Services.query.filter(Closed_Services.location.contains(search_text),Closed_Services.pid == session['professional_id'] ).all()
-        elif search_by == 'customer':
-            search_results = Closed_Services.query.filter(Closed_Services.customer_name.ilike(f"%{search_text}%"),Closed_Services.pid == session['professional_id'] ).all()
+        # Search database based on selected criterion
+        if search_criterion == 'date':
+            search_results = Closed_Services.query.filter(Closed_Services.date == search_input, Closed_Services.pid == session['professional_id']).all()
+        elif search_criterion == 'location':
+            search_results = Closed_Services.query.filter(Closed_Services.location.ilike(f"%{search_input}%"), Closed_Services.pid == session['professional_id']).all()
+        elif search_criterion == 'pincode':
+            search_results = Closed_Services.query.filter(Closed_Services.location.contains(search_input), Closed_Services.pid == session['professional_id']).all()
+        elif search_criterion == 'customer':
+            search_results = Closed_Services.query.filter(Closed_Services.customer_name.ilike(f"%{search_input}%"), Closed_Services.pid == session['professional_id']).all()
         else:
             flash('Invalid search criteria.', 'danger')
+    
     return render_template('user/professional_search.html', search_results=search_results)
 
-# LOG OUT ROUTES
+# Logout Route
 @app.route('/logout')
 def logout():
-    session.clear()  # Clears session data
-    resp = redirect(url_for('user_login'))
-    resp.set_cookie('session', '', expires=0)  # Clear session cookie
-    flash('You have been logged out successfully.', 'info')
-    return resp
+    session.clear()  # Clear session data
+    logout_redirect = redirect(url_for('user_login'))
+    logout_redirect.set_cookie('session', '', expires=0)  # Clear session cookie
+    return logout_redirect
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8000)
