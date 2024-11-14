@@ -2,25 +2,25 @@
 
 {% block content %}
 <div class="container-fluid mb-5" style="max-width: 600px; margin-top: 30px;">
-    <form action="{{ url_for('submit_service_remarks') }}" method="POST" class="shadow p-4 rounded"
-        style="border: 2px solid #ccc; background-color: #f9f9f9;">
-        <h4 class="text-center text-primary mb-3">Service Remarks</h4>
-        <p class="text-center text-primary">Service ID: {{ service.service_id }}</p>
+    <form action="{{ url_for('submit_service_remarks') }}" method="POST" class="shadow-lg p-4 rounded"
+        style="border: 2px solid #d3006b; background-color: #fdf1f5;">
+        <h4 class="text-center text-dark mb-3" style="font-weight: bold;">Service Remarks</h4>
+        <p class="text-center text-dark">Service ID: {{ service.service_id }}</p>
 
         <!-- Service Details -->
         <div class="row mb-3">
             <input type="text" class="form-control text-center" placeholder="{{ service.service_name }}" disabled
-                style="background-color: #f8d7da;">
+                style="background-color: #f7d6df; border: 1px solid #d3006b;">
         </div>
 
         <div class="row mb-3">
             <input type="text" class="form-control text-center" placeholder="{{ service.professional_name }}" disabled
-                style="background-color: #f8d7da;">
+                style="background-color: #f7d6df; border: 1px solid #d3006b;">
         </div>
 
         <!-- Service Rating -->
         <div class="mb-3">
-            <label class="form-label">Service rating:</label>
+            <label class="form-label" style="color: #d3006b;">Service Rating:</label>
             <div class="rating">
                 <span class="diamond">&#9670;</span>
                 <span class="diamond">&#9670;</span>
@@ -34,14 +34,15 @@
 
         <!-- Remarks -->
         <div class="mb-4">
-            <label class="form-label">Remarks (if any):</label>
+            <label class="form-label" style="color: #d3006b;">Remarks (if any):</label>
             <textarea class="form-control" name="remarks" rows="3" placeholder="Enter your remarks here..."
-                style="resize: none;"></textarea>
+                style="resize: none; background-color: #f7d6df; border: 1px solid #d3006b;"></textarea>
         </div>
 
         <!-- Buttons -->
         <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            <button type="submit" class="btn btn-dark btn-sm"
+                style="background-color: #d3006b; color: white; font-weight: bold;">Submit</button>
         </div>
     </form>
 </div>
@@ -49,12 +50,30 @@
 <style>
     .rating .diamond {
         font-size: 1.5em;
-        color: #ff6666;
+        color: #ff3399;
         cursor: pointer;
     }
 
     .rating .diamond.inactive {
-        color: #ccc;
+        color: #d6d6d6;
+    }
+
+    .btn-dark {
+        background-color: #d3006b !important;
+        border: none;
+    }
+
+    .btn-dark:hover {
+        background-color: #9f004d !important;
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #ff3399;
+        box-shadow: 0 0 5px rgba(255, 51, 153, 0.5);
     }
 </style>
 

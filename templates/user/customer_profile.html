@@ -3,31 +3,32 @@
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="p-4 shadow-lg rounded"
-        style="max-width: 400px; width: 100%; background: linear-gradient(to bottom, #0066cc, #004aad); color: #ffffff;">
+        style="max-width: 400px; width: 100%; background: linear-gradient(to bottom, #d5006e, #a30058); color: #ffffff;">
         <h2 class="text-center mb-4" style="color: #ffffff;">Customer Profile</h2>
         <form>
             <div class="mb-3">
-                <label for="email" class="form-label">Email ID (Username)</label>
+                <label for="email" class="form-label" style="color: #ffd1dc;">Email ID (Username)</label>
                 <input type="email" class="form-control" id="email" name="email" value="{{ customer.email }}" readonly
-                    style="border: none; background-color: #e0f0ff;">
+                    style="border: none; background-color: #f9d1e1;">
             </div>
             <div class="mb-3">
-                <label for="fullname" class="form-label">Fullname</label>
+                <label for="fullname" class="form-label" style="color: #ffd1dc;">Fullname</label>
                 <input type="text" class="form-control" id="fullname" name="fullname" value="{{ customer.full_name }}"
-                    readonly style="border: none; background-color: #e0f0ff;">
+                    readonly style="border: none; background-color: #f9d1e1;">
             </div>
             <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
+                <label for="address" class="form-label" style="color: #ffd1dc;">Address</label>
                 <input type="text" class="form-control" id="address" name="address" value="{{ customer.address }}"
-                    readonly style="border: none; background-color: #e0f0ff;">
+                    readonly style="border: none; background-color: #f9d1e1;">
             </div>
             <div class="mb-3">
-                <label for="pincode" class="form-label">Pincode</label>
+                <label for="pincode" class="form-label" style="color: #ffd1dc;">Pincode</label>
                 <input type="text" class="form-control" id="pincode" name="pincode" value="{{ customer.pincode }}"
-                    readonly style="border: none; background-color: #e0f0ff;">
+                    readonly style="border: none; background-color: #f9d1e1;">
             </div>
             <div class="d-flex justify-content-center mt-4">
-                <a href="/" class="btn btn-danger">Logout</a>
+                <a href="/" class="btn btn-light"
+                    style="background-color: #a30058; color: white; font-weight: bold; border-radius: 5px;">Logout</a>
             </div>
         </form>
     </div>

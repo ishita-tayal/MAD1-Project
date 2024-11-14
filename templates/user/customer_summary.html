@@ -4,9 +4,9 @@
 <div class="container-fluid mb-5">
     <div class="row">
         <!-- Right Column: Service History -->
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0" style="border-radius: 10px; background-color: #f8d7df;">
             <div class="card-body" style="min-height: 250px;"> <!-- Reduced height -->
-                <h5 class="card-title" style="color: #004aad;">Service History</h5>
+                <h5 class="card-title" style="color: #d3006b; font-weight: bold;">Service History</h5>
                 <div class="d-flex justify-content-center">
                     <canvas id="serviceHistoryChart" width="300" height="300"></canvas>
                 </div>
@@ -34,7 +34,7 @@
                     serviceHistoryData['Closed'] || 0,
                     serviceHistoryData['Assigned'] || 0
                 ],
-                backgroundColor: ['#17a2b8', '#28a745', '#ffc107'],
+                backgroundColor: ['#e60073', '#ff66b2', '#ff4d94'], // Shades of pink
                 borderColor: '#ffffff',
                 borderWidth: 2
             }]
@@ -43,7 +43,15 @@
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#d3006b' // Dark pink for Y-axis labels
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#d3006b' // Dark pink for X-axis labels
+                    }
                 }
             },
             plugins: {

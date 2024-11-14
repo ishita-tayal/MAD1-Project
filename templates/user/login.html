@@ -1,14 +1,16 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="container my-5">
-    <h1 class="text-center text-primary mb-4">A to Z Household Services</h1>
+<div class="container my-5"
+    style="background: linear-gradient(135deg, #ffe6f0, #ffd1e3); padding: 40px; border-radius: 15px;">
+    <h1 class="text-center mb-4" style="color: #d3006b;">A to Z Household Services</h1>
 
     <div class="card p-4 rounded shadow mx-auto"
-        style="max-width: 500px; background: linear-gradient(135deg, #004aad, #0099ff);">
+        style="max-width: 500px; background: linear-gradient(135deg, #d3006b, #ff66b3); border: none;">
         <div class="mb-4 text-end">
-            <h2 class="text-white fs-5">
-                <a href="{{ url_for('service_prof_signup') }}" class="text-light">Register as Professional</a>
+            <h2 class="fs-5">
+                <a href="{{ url_for('service_prof_signup') }}" class="text-light text-decoration-underline">Register as
+                    Professional</a>
             </h2>
         </div>
 
@@ -16,7 +18,8 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert"
+            style="background-color: #ffc2d6; color: #9f004d;">
             {{ message }}
             <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -28,24 +31,27 @@
 
         <form action="{{ url_for('user_login') }}" method="POST">
             <div class="mb-3 row">
-                <label for="email" class="col-md-4 col-form-label text-white">Registered Email ID:</label>
+                <label for="email" class="col-md-4 col-form-label text-light">Registered Email ID:</label>
                 <div class="col-md-8">
                     <input type="email" class="form-control" id="email" name="email" required
-                        placeholder="Enter your email">
+                        placeholder="Enter your email"
+                        style="background-color: #ffe6f0; border: 1px solid #b20058; color: #b20058;">
                 </div>
             </div>
             <div class="mb-3 row">
-                <label for="password" class="col-md-4 col-form-label text-white">Password:</label>
+                <label for="password" class="col-md-4 col-form-label text-light">Password:</label>
                 <div class="col-md-8">
                     <input type="password" class="form-control" id="password" name="password" required
-                        placeholder="Enter your password">
+                        placeholder="Enter your password"
+                        style="background-color: #ffe6f0; border: 1px solid #b20058; color: #b20058;">
                 </div>
             </div>
-            <button type="submit" class="btn btn-light btn-lg w-100">Login</button>
+            <button type="submit" class="btn w-100"
+                style="background-color: #b20058; color: #fff; font-weight: bold; border-radius: 30px;">Login</button>
         </form>
         <div class="text-center mt-3">
-            <p class="text-white">Don't have an account? <a href="{{ url_for('user_register') }}"
-                    class="text-light">Create Account</a></p>
+            <p class="text-light">Don't have an account? <a href="{{ url_for('user_register') }}"
+                    class="text-light text-decoration-underline">Create Account</a></p>
         </div>
     </div>
 </div>

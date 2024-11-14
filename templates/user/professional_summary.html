@@ -4,10 +4,10 @@
 <div class="container-fluid mb-5">
     <div class="row">
         <!-- Left Column: Reviews/Ratings -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body" style="min-height: 250px;"> <!-- Reduced height -->
-                    <h5 class="card-title" style="color: #004aad;">Reviews / Ratings</h5>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0" style="background-color: #ffe6f2;">
+                <div class="card-body" style="min-height: 250px;">
+                    <h5 class="card-title text-center" style="color: #d3006b;">Reviews / Ratings</h5>
                     <div class="d-flex justify-content-center">
                         <canvas id="ratingsChart" width="300" height="300"></canvas>
                     </div>
@@ -16,10 +16,10 @@
         </div>
 
         <!-- Right Column: Service Requests -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body" style="min-height: 250px;"> <!-- Reduced height -->
-                    <h5 class="card-title" style="color: #004aad;">Service Requests</h5>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0" style="background-color: #ffe6f2;">
+                <div class="card-body" style="min-height: 250px;">
+                    <h5 class="card-title text-center" style="color: #d3006b;">Service Requests</h5>
                     <div class="d-flex justify-content-center">
                         <canvas id="serviceRequestsChart" width="300" height="300"></canvas>
                     </div>
@@ -53,7 +53,7 @@
             labels: ['⭐⭐⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐', '⭐⭐', '⭐'],
             datasets: [{
                 data: ratingsChartData,
-                backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#e0a800', '#dc3545'],
+                backgroundColor: ['#ff69b4', '#ff8cc6', '#ffa6d9', '#ffbfdc', '#ffcfe1'],
                 borderColor: '#ffffff',
                 borderWidth: 2
             }]
@@ -63,6 +63,9 @@
             plugins: {
                 legend: {
                     position: 'top',
+                    labels: {
+                        color: '#d3006b'
+                    }
                 },
                 tooltip: {
                     callbacks: {
@@ -88,7 +91,7 @@
                     serviceRequestsData['Closed'] || 0,
                     serviceRequestsData['Rejected'] || 0
                 ],
-                backgroundColor: ['#17a2b8', '#28a745', '#dc3545'],
+                backgroundColor: ['#ff66b3', '#ff8cc6', '#ffcfe1'],
                 borderColor: '#ffffff',
                 borderWidth: 2
             }]
@@ -97,7 +100,15 @@
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#d3006b'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#d3006b'
+                    }
                 }
             },
             plugins: {
