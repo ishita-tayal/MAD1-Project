@@ -32,15 +32,14 @@ migrate = Migrate(app, db)
 def index():
     return render_template("index.html")
 
-
-#SIGN UP AND LOGIN ROUTES
+# SIGN UP AND LOGIN ROUTES
 @app.route('/user/login', methods=['GET', 'POST'])
 def user_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
 
-        # Check if the user is a Customer
+        # query to verify if the user is a customer
         customer =  Customer.query.filter_by(email=email, password=password).first()
         if customer:
             session['customer_id'] = customer.customer_id
@@ -106,7 +105,6 @@ def user_register():
 
     return render_template('user/register.html')
 
-
 @app.route('/user/service_prof_signup', methods=['GET','POST'])
 def service_prof_signup():
     if request.method == 'POST':
@@ -162,6 +160,10 @@ def get_logged_in_professional():
     if professional_id:
         return Professional.query.get(professional_id)  # Fetch the professional object from the database
     return None  # If no professional is logged in, return None
+
+@app.route('/professional/login', methods=['GET'])
+def service_professional_login():
+    return render_template('user/login.html')
 
 # ADMIN ROUTES
 @app.route('/user/admin_profile', methods=['GET'])
@@ -452,9 +454,21 @@ def close_service():
     # Redirect back to the main page or to a confirmation page
     return render_template('user/customer_remarks.html', service = service)
 
-@app.route('/professional/login', methods=['GET'])
-def service_professional_login():
-    return render_template('user/login.html')
+@app.route('/search_services', methods=['POST'])
+def search_services():
+    search_results = []
+    search_by = None  # Initialize search_by variable
+
+    if request.method == 'POST':  # Handle POST request
+        search_by = request.form.get('service_type')
+        # Search in the 'services' table for service_name
+        search_results = Professional.query.filter(Professional.service_name.ilike(f"%{search_by}%"),Professional.status == "Approved").all()
+
+    customer_id = session['customer_id']
+    service_history = Service_History.query.filter_by(id=customer_id).all()
+    services = Services.query.all()
+
+    return render_template('user/customer_dashboard.html', services=services,service_history=service_history,search_results=search_results, search_by=search_by)
 
 #PROFESSIONAL ROUTES
 @app.route('/user/professional_dashboard', methods=['GET'])
@@ -548,8 +562,6 @@ def professional_edit_profile(professional_id):
         professional.address = address
         professional.pincode = pincode
 
-        # Role and status are not updated, they remain unchanged
-
         # Commit changes to the database
         try:
             db.session.commit()
@@ -609,7 +621,6 @@ def professional_summary():
 @app.route('/user/professional_search', methods=['GET', 'POST'])
 def professional_search():
     search_results = []
-
     if request.method == 'POST':
         search_by = request.form.get('searchBy')
         search_text = request.form.get('searchText')
@@ -629,54 +640,9 @@ def professional_search():
             search_results = Closed_Services.query.filter(Closed_Services.customer_name.ilike(f"%{search_text}%"),Closed_Services.pid == session['professional_id'] ).all()
         else:
             flash('Invalid search criteria.', 'danger')
-
     return render_template('user/professional_search.html', search_results=search_results)
 
-# Route to edit a service
-@app.route('/user/edit_service/<int:service_id>', methods=['GET', 'POST'])
-def edit_service(service_id):
-    service = Services.query.get_or_404(service_id)
-    
-    if request.method == 'POST':
-        service.service_name = request.form['service_name']
-        service.base_price = request.form['base_price']
-        db.session.commit()
-        return redirect(url_for('admin_dashboard'))
-    
-    return render_template('user/edit_service.html', service=service)
-
-# Route to delete a service
-@app.route('/user/delete_service/<int:service_id>', methods=['POST'])
-def delete_service(service_id):
-    service = Services.query.get_or_404(service_id)
-    db.session.delete(service)
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
-
-# Route to approve a professional
-@app.route('/user/approve_professional/<int:professional_id>', methods=['POST'])
-def approve_professional(professional_id):
-    professional = Professional.query.get_or_404(professional_id)
-    professional.status = 'Approved'  # Assuming you have a status field
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
-
-# Route to reject a professional
-@app.route('/user/reject_professional/<int:professional_id>', methods=['POST'])
-def reject_professional(professional_id):
-    professional = Professional.query.get_or_404(professional_id)
-    professional.status = 'Rejected'  # Assuming you have a status field
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
-
-# Route to delete a professional
-@app.route('/user/delete_professional/<int:professional_id>', methods=['POST'])
-def delete_professional(professional_id):
-    professional = Professional.query.get_or_404(professional_id)
-    db.session.delete(professional)
-    db.session.commit()
-    return redirect(url_for('admin_dashboard'))
-
+# LOG OUT ROUTES
 @app.route('/logout')
 def logout():
     session.clear()  # Clears session data
@@ -684,32 +650,6 @@ def logout():
     resp.set_cookie('session', '', expires=0)  # Clear session cookie
     flash('You have been logged out successfully.', 'info')
     return resp
-
-@app.route('/search_services', methods=['POST'])
-def search_services():
-    
-    
-    search_results = []
-    search_by = None  # Initialize search_by variable
-
-    if request.method == 'POST':  # Handle POST request
-        search_by = request.form.get('service_type')
-        # Search in the 'services' table for service_name
-        search_results = Professional.query.filter(Professional.service_name.ilike(f"%{search_by}%"),Professional.status == "Approved").all()
-
-    customer_id = session['customer_id']
-    service_history = Service_History.query.filter_by(id=customer_id).all()
-    services = Services.query.all()
-
-    return render_template('user/customer_dashboard.html', services=services,service_history=service_history,search_results=search_results, search_by=search_by)
-    
-    
-
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8000)
