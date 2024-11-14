@@ -16,7 +16,7 @@ app = Flask(__name__, instance_relative_config=True)
 app.secret_key = secrets.token_hex(16)
 
 # Set the database URI (using the correct SQLite URI format)
-app.config['SQLALCHEMY_DATABASE_URI'] = r"sqlite:///C:\Users\hp\Desktop\household_services_database.db"  # Absolute path for SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = r"sqlite:///C:\Users\Ishita Tayal\Desktop\household_services.db"  # Absolute path for SQLite
 
 # Disable track modifications (optional)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
