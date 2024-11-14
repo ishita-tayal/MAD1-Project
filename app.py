@@ -155,7 +155,7 @@ def service_prof_signup():
     return render_template('user/service_prof_signup.html')
 
 def get_logged_in_professional():
-    # Check if the professional is logged in
+    # Validate logged-in professional
     professional_id = session.get('professional_id')
     if professional_id:
         return Professional.query.get(professional_id)  # Fetch the professional object from the database
@@ -182,7 +182,7 @@ def add_service():
         service_name = request.form['service_name']
         base_price = request.form['base_price']
 
-        # Create and save the new service
+        # Initialize and store new service data
         new_service = Services(id=service_id,service_name=service_name, base_price=base_price)
         db.session.add(new_service)
         db.session.commit()
@@ -240,7 +240,7 @@ def delete_professional(professional_id):
 @app.route('/user/admin_dashboard', methods=['GET'])
 def admin_dashboard():
     services=Services.query.all()
-    # Query today's services and join with professionals to get their names
+    # Retrieve today's services and include professional names
     today_services_query = db.session.execute(
         text("""
             SELECT ts.id, ts.professional_id, p.full_name as professional_name
@@ -294,7 +294,7 @@ def admin_dashboard():
             'status': status
         })
 
-    # Pass data to template
+    # Render data in the template
     return render_template(
         'user/admin_dashboard.html',
         services=services,
