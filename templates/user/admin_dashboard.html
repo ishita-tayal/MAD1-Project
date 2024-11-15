@@ -19,7 +19,7 @@
             <tr>
                 <td><a href="#" style="color: #99004c;">{{ service.id }}</a></td> <!-- Dark pink link -->
                 <td>{{ service.service_name }}</td>
-                <td>${{ service.base_price }}</td>
+                <td>Rs.{{ service.base_price }}</td>
                 <td>
                     <a href="{{ url_for('edit_service', service_id=service.id) }}"
                         class="btn btn-outline-warning btn-sm">Edit</a>
